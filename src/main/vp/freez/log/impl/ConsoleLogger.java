@@ -14,11 +14,11 @@ public class ConsoleLogger extends Logger {
 	}
 
 	public void info(String msg) {
-		System.out.println(this.time() + "--" + this.getName() + "::" + msg);
+		System.out.println(this.time() + "   " + this.getName() + "   info   " +msg);
 	}
 
 	public void error(String msg) {
-		System.err.println(this.time() + "--" + this.getName() + "::" + msg);
+		System.err.println(this.time() + "   " + this.getName() + "   error   " + msg);
 	}
 	
 }

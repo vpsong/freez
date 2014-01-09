@@ -1,6 +1,10 @@
 package vp.freez.web.servlet;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,6 +16,7 @@ import vp.freez.log.Logger;
 import vp.freez.web.Setup;
 import vp.freez.web.config.AnnotationSetup;
 import vp.freez.web.config.FreezConfig;
+import vp.freez.web.config.UrlMapping;
 
 /**
  * 
@@ -48,6 +53,26 @@ public class FreezServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		super.service(request, response);
+		for(Entry<Pattern, Method> en: UrlMapping.getUrlMap().entrySet()) {
+			if(en.getKey().matcher(request.getRequestURI()).find()) {
+				Method method = en.getValue();
+				try {
+					method.invoke(method.getDeclaringClass().newInstance());
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

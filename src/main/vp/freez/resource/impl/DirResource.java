@@ -15,8 +15,8 @@ import vp.freez.resource.Resource;
  */
 public class DirResource extends Resource {
 
-	public DirResource(File file) {
-		super(file);
+	public DirResource(File file, String packagePath) {
+		super(file, packagePath);
 		if (!file.exists() || !file.isDirectory()) {
 			throw new ResourceException("DirResource must be a dir");
 		}
@@ -26,7 +26,7 @@ public class DirResource extends Resource {
 		Set<FileResource> set = new HashSet<FileResource>();
 		File[] files = getFile().listFiles(new ClassFileFilter());
 		for (File file : files) {
-			Resource resource = Resource.getResource(file);
+			Resource resource = Resource.getResource(file, getPackagePath() + "." + file.getName());
 			if (resource instanceof FileResource) {
 				set.add((FileResource) resource);
 			} else if (resource instanceof DirResource) {

@@ -12,10 +12,15 @@ import java.util.regex.Pattern;
  */
 public class UrlMapping {
 
-	private Map<Pattern, Method> urlMap = new HashMap<Pattern, Method>();
+	private static Map<Pattern, Method> urlMap = new HashMap<Pattern, Method>();
+	private static Map<Class<?>, String> namespaceMap = new HashMap<Class<?>, String>();
 
-	public Map<Pattern, Method> getUrlMap() {
+	public static Map<Pattern, Method> getUrlMap() {
 		return urlMap;
+	}
+
+	public static Map<Class<?>, String> getNamespaceMap() {
+		return namespaceMap;
 	}
 
 }

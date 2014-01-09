@@ -12,8 +12,8 @@ import vp.freez.resource.Resource;
  */
 public class JarResource extends Resource {
 
-	public JarResource(File file) {
-		super(file);
+	public JarResource(File file, String packagePath) {
+		super(file, packagePath);
 		// TODO Auto-generated constructor stub
 	}
 

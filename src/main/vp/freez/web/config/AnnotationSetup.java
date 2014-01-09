@@ -1,12 +1,18 @@
 package vp.freez.web.config;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import vp.freez.log.Logger;
 import vp.freez.resource.Resource;
 import vp.freez.resource.impl.FileResource;
 import vp.freez.web.Setup;
+import vp.freez.web.annotation.AnnotationInfo;
 
 /**
  * 
@@ -19,16 +25,28 @@ public class AnnotationSetup implements Setup {
 
 	public void init(FreezConfig config) {
 		String controllerPackage = config.getControllerPackage();
-		controllerPackage = controllerPackage.replaceAll("\\.", "/");
-		String path = config.getClassPath() + "/" + controllerPackage;
-		Set<FileResource> set = Resource.getResource(new File(path))
-				.findClassResource();
-		if (set == null) {
+		String path = config.getClassPath() + "/"
+				+ controllerPackage.replaceAll("\\.", "/");
+		Set<FileResource> frSet = Resource.getResource(new File(path),
+				controllerPackage).findClassResource();
+		if (frSet == null) {
 			logger.error("controllerPackage does not exist");
 			return;
 		}
-		for (FileResource f : set) {
-			logger.info(f.getClassName());
+		Set<AnnotationInfo> aiSet = new HashSet<AnnotationInfo>();
+		try {
+			for (FileResource fr : frSet) {
+				aiSet.addAll(fr.scan());
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		for(AnnotationInfo ai : aiSet) {
+			ai.affect();
+		}
+		Map<Pattern, Method> map = UrlMapping.getUrlMap();
+		for(Entry en : map.entrySet()) {
+			System.out.println(en.getKey());
 		}
 	}
 

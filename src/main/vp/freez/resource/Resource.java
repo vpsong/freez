@@ -10,28 +10,30 @@ import vp.freez.resource.impl.FileResource;
 /**
  * 
  * @author vpsong
- *
+ * 
  */
 public abstract class Resource {
-	
+
 	private File file;
-	
-	public Resource(File file) {
+	private String packagePath;
+
+	public Resource(File file, String packagePath) {
 		super();
 		this.file = file;
+		this.packagePath = packagePath;
 	}
-	
-	public static Resource getResource(File file) {
-		if(!file.exists()) {
+
+	public static Resource getResource(File file, String packagePath) {
+		if (!file.exists()) {
 			return null;
-		} else if(file.isFile()) {
-			return new FileResource(file);
-		} else if(file.isDirectory()) {
-			return new DirResource(file);
+		} else if (file.isFile()) {
+			return new FileResource(file, packagePath);
+		} else if (file.isDirectory()) {
+			return new DirResource(file, packagePath);
 		}
 		return null;
-	} 
-	
+	}
+
 	public Set<FileResource> findClassResource() {
 		return null;
 	}
@@ -39,5 +41,9 @@ public abstract class Resource {
 	public File getFile() {
 		return file;
 	}
-	
+
+	public String getPackagePath() {
+		return packagePath;
+	}
+
 }
