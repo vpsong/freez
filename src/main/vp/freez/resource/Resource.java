@@ -18,7 +18,6 @@ public abstract class Resource {
 	private String packagePath;
 
 	public Resource(File file, String packagePath) {
-		super();
 		this.file = file;
 		this.packagePath = packagePath;
 	}

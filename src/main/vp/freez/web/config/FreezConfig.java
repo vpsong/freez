@@ -13,7 +13,6 @@ public class FreezConfig {
 
 	public FreezConfig(String setupType, String controllerPackage,
 			String classPath) {
-		super();
 		this.setupType = setupType;
 		this.controllerPackage = controllerPackage;
 		this.classPath = classPath;

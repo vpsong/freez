@@ -1,14 +1,11 @@
 package vp.freez.web.config;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import vp.freez.log.Logger;
 import vp.freez.resource.Resource;
 import vp.freez.resource.impl.FileResource;
 import vp.freez.web.Setup;
@@ -21,7 +18,7 @@ import vp.freez.web.annotation.AnnotationInfo;
  */
 public class AnnotationSetup implements Setup {
 
-	private Logger logger = Logger.getLogger(AnnotationSetup.class);
+	private static Logger logger = Logger.getLogger("AnnotationSetup");
 
 	public void init(FreezConfig config) {
 		String controllerPackage = config.getControllerPackage();
@@ -30,7 +27,7 @@ public class AnnotationSetup implements Setup {
 		Set<FileResource> frSet = Resource.getResource(new File(path),
 				controllerPackage).findClassResource();
 		if (frSet == null) {
-			logger.error("controllerPackage does not exist");
+			logger.log(Level.WARNING, "controllerPackage does not exist");
 			return;
 		}
 		Set<AnnotationInfo> aiSet = new HashSet<AnnotationInfo>();
@@ -43,10 +40,6 @@ public class AnnotationSetup implements Setup {
 		}
 		for(AnnotationInfo ai : aiSet) {
 			ai.affect();
-		}
-		Map<Pattern, Method> map = UrlMapping.getUrlMap();
-		for(Entry en : map.entrySet()) {
-			System.out.println(en.getKey());
 		}
 	}
 
