@@ -6,23 +6,24 @@
     <welcome-file>index.htm</welcome-file>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
-  <servlet>
-    <description></description>
-    <display-name>FreezServlet</display-name>
-    <servlet-name>FreezServlet</servlet-name>
-    <servlet-class>vp.freez.web.servlet.FreezServlet</servlet-class>
+
+  <filter>
+    <display-name>FreezFilter</display-name>
+    <filter-name>FreezFilter</filter-name>
+    <filter-class>vp.freez.filter.FreezFilter</filter-class>
     <init-param>
-       <param-name>controllerPackage</param-name>
-       <param-value>vp.freez.web.controller</param-value>
+      <param-name>controllerPackage</param-name>
+      <param-value>vp.freez.web.controller</param-value>
     </init-param>
     <init-param>
-       <param-name>setup</param-name>
-       <param-value>annotation</param-value>
+      <param-name>setup</param-name>
+      <param-value>annotation</param-value>
     </init-param>
-    <load-on-startup>0</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>FreezServlet</servlet-name>
+  </filter>
+  <filter-mapping>
+    <filter-name>FreezFilter</filter-name>
     <url-pattern>/*</url-pattern>
-  </servlet-mapping>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
 </web-app>
