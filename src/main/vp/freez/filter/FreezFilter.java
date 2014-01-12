@@ -1,8 +1,10 @@
 package vp.freez.filter;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,23 +29,20 @@ import vp.freez.web.controller.Controller;
 /**
  * 
  * @author vpsong
- *
+ * 
  */
 public class FreezFilter implements Filter {
-	
+
 	private static Logger logger = Logger.getLogger("FreezFilter");
-	private static Pattern ignorePtn = Pattern.compile("^(.+[.])(jsp|png|gif|jpg|js|css|jspx|jpeg)$");
+	private static Pattern ignorePtn = Pattern
+			.compile("^(.+[.])(jsp|png|gif|jpg|js|css|jspx|jpeg)$");
 
-	public void destroy() {
-		// TODO Auto-generated method stub
-	}
-
-	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest request = (HttpServletRequest)req;
-        HttpServletResponse response = (HttpServletResponse)resp;
+	public void doFilter(ServletRequest req, ServletResponse resp,
+			FilterChain chain) throws IOException, ServletException {
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) resp;
 		boolean isMatch = false;
-		System.out.println(request.getRequestURI());
-		if(ignorePtn.matcher(request.getRequestURI()).find()) {
+		if (ignorePtn.matcher(request.getRequestURI()).find()) {
 			chain.doFilter(request, response);
 			return;
 		}
@@ -56,6 +55,16 @@ public class FreezFilter implements Filter {
 							.newInstance();
 					ctrl.setRequest(request);
 					ctrl.setResponse(response);
+					Map<String, String[]> map = request.getParameterMap();
+					for (Entry<String, String[]> entry : map.entrySet()) {
+						Field field = ctrl.getClass().getDeclaredField(
+								entry.getKey());
+						if (field != null) {
+							field.setAccessible(true);
+							field.set(ctrl, entry.getValue()[0]);
+							field.setAccessible(false);
+						}
+					}
 					method.invoke(ctrl);
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
@@ -65,13 +74,17 @@ public class FreezFilter implements Filter {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
 					e.printStackTrace();
+				} catch (NoSuchFieldException e) {
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					e.printStackTrace();
 				}
 			}
 		}
 		if (!isMatch) {
 			request.getRequestDispatcher("/404.jsp").forward(request, response);
 		}
-		
+
 	}
 
 	public void init(FilterConfig fConfig) throws ServletException {
@@ -90,6 +103,10 @@ public class FreezFilter implements Filter {
 		FreezConfig freezConfig = new FreezConfig(setupType, controllerPackage,
 				classPath);
 		setup.init(freezConfig);
+	}
+
+	public void destroy() {
+		// TODO Auto-generated method stub
 	}
 
 }
