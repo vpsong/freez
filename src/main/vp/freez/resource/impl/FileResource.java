@@ -12,6 +12,7 @@ import vp.freez.resource.Resource;
 import vp.freez.web.annotation.Action;
 import vp.freez.web.annotation.AnnotationInfo;
 import vp.freez.web.annotation.Namespace;
+import vp.freez.web.annotation.Views;
 import vp.freez.web.annotation.impl.ClassAnnotationInfo;
 import vp.freez.web.annotation.impl.MethodAnnotationInfo;
 import vp.freez.web.config.UrlMapping;
@@ -33,24 +34,19 @@ public class FileResource extends Resource {
 	public Set<AnnotationInfo> scan() throws ClassNotFoundException {
 		Set<AnnotationInfo> set = new HashSet<AnnotationInfo>();
 		Class<?> cls = Class.forName(getClassName());
-		Annotation[] annotations = cls.getDeclaredAnnotations();
 		Map<Class<?>, String> namespaceMap = UrlMapping.getNamespaceMap();
-		for (Annotation an : annotations) {
-			if (an instanceof Namespace) {
-				namespaceMap.put(cls, ((Namespace) an).value());
-			}
+		Namespace namespace = cls.getAnnotation(Namespace.class);
+		if (namespace != null) {
+			namespaceMap.put(cls, namespace.value());
 		}
+
 		Method[] methods = cls.getDeclaredMethods();
 		for (Method method : methods) {
-			Annotation[] ans = method.getAnnotations();
-			for (Annotation an : ans) {
-				MethodAnnotationInfo ai = new MethodAnnotationInfo();
-				if (an instanceof Action) {
-					ai.setAction((Action) an);
-				}
-				ai.setMethod(method);
-				set.add(ai);
-			}
+			MethodAnnotationInfo ai = new MethodAnnotationInfo();
+			ai.setMethod(method);
+			ai.setAction(method.getAnnotation(Action.class));
+			ai.setViews(method.getAnnotation(Views.class));
+			set.add(ai);
 		}
 		return set;
 	}

@@ -32,7 +32,7 @@ import vp.freez.web.controller.Controller;
 public class FreezFilter implements Filter {
 	
 	private static Logger logger = Logger.getLogger("FreezFilter");
-	private static Pattern staticResource = Pattern.compile("^(.+[.])(jsp|png|gif|jpg|js|css|jspx|jpeg)$");
+	private static Pattern ignorePtn = Pattern.compile("^(.+[.])(jsp|png|gif|jpg|js|css|jspx|jpeg)$");
 
 	public void destroy() {
 		// TODO Auto-generated method stub
@@ -43,7 +43,7 @@ public class FreezFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse)resp;
 		boolean isMatch = false;
 		System.out.println(request.getRequestURI());
-		if(staticResource.matcher(request.getRequestURI()).find()) {
+		if(ignorePtn.matcher(request.getRequestURI()).find()) {
 			chain.doFilter(request, response);
 			return;
 		}

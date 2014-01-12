@@ -2,8 +2,11 @@ package vp.freez.web.controller;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import vp.freez.web.view.View;
 
 /**
  * 
@@ -23,6 +26,19 @@ public abstract class Controller {
 		response.setDateHeader("Expires", 0);
 		try {
 			response.getWriter().write(text);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void renderView(String name) {
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
+		String key = View.getViewKey(ste.getClassName(), ste.getMethodName(), name);
+		String path = View.getViewMap().get(key);
+		try {
+			request.getRequestDispatcher(path).forward(request, response);
+		} catch (ServletException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
