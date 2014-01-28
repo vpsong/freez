@@ -20,11 +20,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import vp.freez.util.StringUtil;
 import vp.freez.web.Setup;
+import vp.freez.web.annotation.Ioc;
 import vp.freez.web.config.AnnotationSetup;
 import vp.freez.web.config.FreezConfig;
 import vp.freez.web.config.UrlMapping;
 import vp.freez.web.controller.Controller;
+import vp.freez.web.ioc.IocManager;
 
 /**
  * 
@@ -55,14 +58,36 @@ public class FreezFilter implements Filter {
 							.newInstance();
 					ctrl.setRequest(request);
 					ctrl.setResponse(response);
-					Map<String, String[]> map = request.getParameterMap();
-					for (Entry<String, String[]> entry : map.entrySet()) {
-						Field field = ctrl.getClass().getDeclaredField(
-								entry.getKey());
-						if (field != null) {
-							field.setAccessible(true);
-							field.set(ctrl, entry.getValue()[0]);
-							field.setAccessible(false);
+					Map<String, String[]> paramMap = request.getParameterMap();
+					// for (Entry<String, String[]> entry : paramMap.entrySet())
+					// {
+					// Field field = ctrl.getClass().getDeclaredField(
+					// entry.getKey());
+					// if (field != null) {
+					// field.setAccessible(true);
+					// field.set(ctrl, entry.getValue()[0]);
+					// field.setAccessible(false);
+					// }
+					// }
+					Map<String, Object> iocContainer = IocManager.getInstance()
+							.getIocContainer();
+					Field[] fields = ctrl.getClass().getDeclaredFields();
+					for (Field f : fields) {
+						Ioc ioc = f.getAnnotation(Ioc.class);
+						if (ioc != null) {
+							String name = StringUtil.isBlank(ioc.value()) ? f
+									.getName() : ioc.value();
+							Object value = iocContainer.get(name);
+							f.setAccessible(true);
+							f.set(ctrl, value);
+							f.setAccessible(false);
+						} else {
+							String[] values = paramMap.get(f.getName());
+							if (values != null && values.length > 0) {
+								f.setAccessible(true);
+								f.set(ctrl, values[0]);
+								f.setAccessible(false);
+							}
 						}
 					}
 					method.invoke(ctrl);
@@ -73,8 +98,6 @@ public class FreezFilter implements Filter {
 				} catch (InvocationTargetException e) {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (NoSuchFieldException e) {
 					e.printStackTrace();
 				} catch (SecurityException e) {
 					e.printStackTrace();

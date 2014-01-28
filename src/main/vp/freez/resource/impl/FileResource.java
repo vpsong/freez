@@ -9,13 +9,17 @@ import java.util.Set;
 
 import vp.freez.exception.ResourceException;
 import vp.freez.resource.Resource;
+import vp.freez.util.StringUtil;
 import vp.freez.web.annotation.Action;
 import vp.freez.web.annotation.AnnotationInfo;
+import vp.freez.web.annotation.Cache;
 import vp.freez.web.annotation.Namespace;
+import vp.freez.web.annotation.Service;
 import vp.freez.web.annotation.Views;
 import vp.freez.web.annotation.impl.ClassAnnotationInfo;
 import vp.freez.web.annotation.impl.MethodAnnotationInfo;
 import vp.freez.web.config.UrlMapping;
+import vp.freez.web.ioc.IocManager;
 
 /**
  * 
@@ -31,13 +35,19 @@ public class FileResource extends Resource {
 		}
 	}
 
-	public Set<AnnotationInfo> scan() throws ClassNotFoundException {
+	public Set<AnnotationInfo> scan() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Set<AnnotationInfo> set = new HashSet<AnnotationInfo>();
 		Class<?> cls = Class.forName(getClassName());
 		Map<Class<?>, String> namespaceMap = UrlMapping.getNamespaceMap();
+		Map<String, Object> iocContainer = IocManager.getInstance().getIocContainer();
 		Namespace namespace = cls.getAnnotation(Namespace.class);
 		if (namespace != null) {
 			namespaceMap.put(cls, namespace.value());
+		}
+		Service service = cls.getAnnotation(Service.class);
+		if(service != null) {
+			String name = StringUtil.isBlank(service.value()) ? cls.getSimpleName() : service.value();
+			iocContainer.put(name, cls.newInstance());
 		}
 
 		Method[] methods = cls.getDeclaredMethods();
@@ -46,6 +56,7 @@ public class FileResource extends Resource {
 			ai.setMethod(method);
 			ai.setAction(method.getAnnotation(Action.class));
 			ai.setViews(method.getAnnotation(Views.class));
+			ai.setCache(method.getAnnotation(Cache.class));
 			set.add(ai);
 		}
 		return set;

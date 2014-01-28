@@ -2,6 +2,7 @@ package vp.freez.web.annotation.impl;
 
 import vp.freez.web.annotation.AnnotationInfo;
 import vp.freez.web.annotation.Namespace;
+import vp.freez.web.annotation.Service;
 
 /**
  * 
@@ -11,6 +12,7 @@ import vp.freez.web.annotation.Namespace;
 public class ClassAnnotationInfo implements AnnotationInfo {
 
 	private Namespace namespace;
+	private Service service;
 	private Class<?> clazz;
 
 	public Namespace getNamespace() {
@@ -31,6 +33,14 @@ public class ClassAnnotationInfo implements AnnotationInfo {
 
 	public void affect() {
 		// TODO Auto-generated method stub
+	}
+
+	public Service getService() {
+		return service;
+	}
+
+	public void setService(Service service) {
+		this.service = service;
 	}
 
 }
