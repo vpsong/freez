@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
  * @author vp.song
  *
  */
-@Documented
-@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cache {
-	int expire() default 10;
+@Target(ElementType.TYPE)
+@Documented
+public @interface InterceptorName {
+	String value() default "";
 }

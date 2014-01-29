@@ -1,16 +1,23 @@
 package vp.freez.web.annotation.impl;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import vp.freez.util.StringUtil;
 import vp.freez.web.annotation.Action;
 import vp.freez.web.annotation.AnnotationInfo;
 import vp.freez.web.annotation.Cache;
+import vp.freez.web.annotation.Interceptors;
 import vp.freez.web.annotation.JSP;
 import vp.freez.web.annotation.Views;
 import vp.freez.web.config.UrlMapping;
+import vp.freez.web.interceptor.Interceptor;
+import vp.freez.web.interceptor.InterceptorManager;
 import vp.freez.web.view.View;
 
 /**
@@ -19,11 +26,14 @@ import vp.freez.web.view.View;
  * 
  */
 public class MethodAnnotationInfo implements AnnotationInfo {
+	
+	private static Logger logger = Logger.getLogger("MethodAnnotationInfo");
 
 	private Method method;
 	private Action action;
 	private Views views;
 	private Cache cache;
+	private Interceptors interceptors;
 
 	public Method getMethod() {
 		return method;
@@ -39,6 +49,14 @@ public class MethodAnnotationInfo implements AnnotationInfo {
 
 	public void setCache(Cache cache) {
 		this.cache = cache;
+	}
+
+	public Interceptors getInterceptors() {
+		return interceptors;
+	}
+
+	public void setInterceptors(Interceptors interceptors) {
+		this.interceptors = interceptors;
 	}
 
 	public Action getAction() {
@@ -80,6 +98,18 @@ public class MethodAnnotationInfo implements AnnotationInfo {
 						jsp.path());
 			}
 		}
+		if(interceptors != null && interceptors.value() != null && interceptors.value().length > 0) {
+			String[] values = interceptors.value();
+			Map<String, Interceptor> interceptorMap = InterceptorManager.getInstance().getInterceptorMap();
+			List<Interceptor> list = new ArrayList<Interceptor>();
+			for(String value : values) {
+				if(interceptorMap.get(value) != null) {
+					list.add(interceptorMap.get(value));
+				} else {
+					logger.log(Level.WARNING, "no interceptor named " + value);
+				}
+			}
+			InterceptorManager.getInstance().getInvokeMap().put(method, list);
+		}
 	}
-
 }

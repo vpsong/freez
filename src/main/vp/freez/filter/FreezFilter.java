@@ -26,6 +26,8 @@ import vp.freez.web.annotation.Ioc;
 import vp.freez.web.config.AnnotationSetup;
 import vp.freez.web.config.FreezConfig;
 import vp.freez.web.config.UrlMapping;
+import vp.freez.web.context.ActionContext;
+import vp.freez.web.context.ActionInvocation;
 import vp.freez.web.controller.Controller;
 import vp.freez.web.ioc.IocManager;
 
@@ -90,12 +92,12 @@ public class FreezFilter implements Filter {
 							}
 						}
 					}
-					method.invoke(ctrl);
+					ActionContext actionContext = new ActionContext(request, response);
+					ActionInvocation invocation = new ActionInvocation(actionContext, ctrl, method); 
+					invocation.invoke();
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
 					e.printStackTrace();

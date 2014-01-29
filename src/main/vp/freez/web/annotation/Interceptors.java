@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cache {
-	int expire() default 10;
+public @interface Interceptors {
+	String[] value() default {};
 }
