@@ -21,6 +21,7 @@ import vp.freez.web.config.UrlMapping;
 import vp.freez.web.interceptor.Interceptor;
 import vp.freez.web.interceptor.InterceptorManager;
 import vp.freez.web.ioc.IocManager;
+import vp.freez.web.proxy.ServiceProxy;
 
 /**
  * 
@@ -53,7 +54,8 @@ public class FileResource extends Resource {
 		if (service != null) {
 			String name = StringUtil.isBlank(service.value()) ? cls
 					.getSimpleName() : service.value();
-			iocContainer.put(name, cls.newInstance());
+			ServiceProxy proxy = new ServiceProxy();
+			iocContainer.put(name, proxy.newProxyInstance(cls.newInstance()));
 		}
 		InterceptorName interceptor = cls.getAnnotation(InterceptorName.class);
 		if (interceptor != null && !StringUtil.isBlank(interceptor.value())) {

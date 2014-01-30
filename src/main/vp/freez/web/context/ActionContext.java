@@ -12,7 +12,7 @@ public class ActionContext {
 
 	private HttpServletRequest request;
 	private HttpServletResponse response;
-	
+
 	public ActionContext(HttpServletRequest request,
 			HttpServletResponse response) {
 		this.request = request;

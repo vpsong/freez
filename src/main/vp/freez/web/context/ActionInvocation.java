@@ -11,15 +11,15 @@ import vp.freez.web.interceptor.InterceptorManager;
 /**
  * 
  * @author vp.song
- *
+ * 
  */
 public class ActionInvocation {
-	
+
 	private ActionContext actionContext;
 	private Controller controller;
 	private Method invokeMethod;
 	private int interceptIndex;
-	
+
 	public ActionInvocation(ActionContext actionContext, Controller controller,
 			Method invokeMethod) {
 		this.actionContext = actionContext;
@@ -28,8 +28,9 @@ public class ActionInvocation {
 	}
 
 	public void invoke() {
-		List<Interceptor> interceptors = InterceptorManager.getInstance().getInvokeMap().get(invokeMethod);
-		if(interceptIndex < interceptors.size()) {
+		List<Interceptor> interceptors = InterceptorManager.getInstance()
+				.getInvokeMap().get(invokeMethod);
+		if (interceptIndex < interceptors.size()) {
 			Interceptor i = interceptors.get(interceptIndex++);
 			i.intercept(this);
 			return;
@@ -44,5 +45,5 @@ public class ActionInvocation {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

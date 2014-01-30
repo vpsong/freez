@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author vpsong
- *
+ * 
  */
 @Documented
 @Target(ElementType.TYPE)

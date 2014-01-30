@@ -15,6 +15,7 @@ import vp.freez.web.annotation.Cache;
 import vp.freez.web.annotation.Interceptors;
 import vp.freez.web.annotation.JSP;
 import vp.freez.web.annotation.Views;
+import vp.freez.web.cache.WebCache;
 import vp.freez.web.config.UrlMapping;
 import vp.freez.web.interceptor.Interceptor;
 import vp.freez.web.interceptor.InterceptorManager;

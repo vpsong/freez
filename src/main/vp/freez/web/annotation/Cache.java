@@ -9,11 +9,11 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author vp.song
- *
+ * 
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cache {
-	int expire() default 10;
+	int expire() default -1;
 }
