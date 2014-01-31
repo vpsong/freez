@@ -18,5 +18,8 @@ public interface Cache<K, V> {
 
 	V remove(K key);
 
+	int deleteExpired();
+
 	void clear();
+
 }

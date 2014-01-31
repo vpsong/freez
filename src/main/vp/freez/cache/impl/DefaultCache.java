@@ -54,6 +54,7 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V get(K key) {
+		deleteExpired();
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
 			++missTimes;
@@ -82,6 +83,18 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 		}
 		expiresQueue.remove(cobj);
 		return cobj.object;
+	}
+
+	public int deleteExpired() {
+		int count = 0;
+		CacheObject<K, V> cobj = expiresQueue.peek();
+		while (cobj != null && cobj.expires <= System.currentTimeMillis()) {
+			cacheMap.remove(cobj.key);
+			expiresQueue.poll();
+			++count;
+			cobj = expiresQueue.peek();
+		}
+		return count;
 	}
 
 	public synchronized void clear() {
