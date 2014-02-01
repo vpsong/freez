@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import vp.freez.cache.Cache;
+import vp.freez.cache.CacheOversizedException;
 
 /**
  * 
@@ -13,6 +14,8 @@ import vp.freez.cache.Cache;
  */
 public class DefaultCache<K, V> implements Cache<K, V> {
 
+	private int maxSize;
+	private static final float RELEASE_RATE = 0.8F;
 	private long hitTimes;
 	private long missTimes;
 
@@ -20,6 +23,7 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	private PriorityQueue<CacheObject<K, V>> expiresQueue;
 
 	public DefaultCache(int initSize) {
+		this.maxSize = initSize;
 		cacheMap = new ConcurrentHashMap<K, CacheObject<K, V>>(initSize);
 		expiresQueue = new PriorityQueue<CacheObject<K, V>>(initSize,
 				new Comparator<CacheObject<K, V>>() {
@@ -37,6 +41,12 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V put(K key, V value, long age) {
+		if(this.size() >= maxSize * RELEASE_RATE) {
+			deleteExpired();
+			if(this.size() >= maxSize) {
+				throw new CacheOversizedException();
+			}
+		}
 		long expires = System.currentTimeMillis() + age * 1000;
 		CacheObject<K, V> obj = new CacheObject<K, V>(key, value, expires);
 		cacheMap.put(key, obj);
@@ -45,6 +55,12 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public boolean add(K key, V value, long expires) {
+		if(this.size() >= maxSize * RELEASE_RATE) {
+			deleteExpired();
+			if(this.size() >= maxSize) {
+				throw new CacheOversizedException();
+			}
+		}
 		long exist = exist(key);
 		if (exist > 0) {
 			return false;
@@ -54,9 +70,14 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V get(K key) {
-		deleteExpired();
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
+			++missTimes;
+			return null;
+		}
+		if(cobj.expires <= System.currentTimeMillis()) {
+			cacheMap.remove(cobj.key);
+			expiresQueue.remove(cobj);
 			++missTimes;
 			return null;
 		}
@@ -67,6 +88,11 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	public long exist(K key) {
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
+			return -1L;
+		}
+		if(cobj.expires <= System.currentTimeMillis()) {
+			cacheMap.remove(cobj.key);
+			expiresQueue.remove(cobj);
 			return -1L;
 		}
 		return cobj.expires;

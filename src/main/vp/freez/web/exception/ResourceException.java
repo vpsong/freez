@@ -1,4 +1,4 @@
-package vp.freez.exception;
+package vp.freez.web.exception;
 
 public class ResourceException extends RuntimeException{
 	private static final long serialVersionUID = 1L;

@@ -5,8 +5,8 @@ import java.io.FileFilter;
 import java.util.HashSet;
 import java.util.Set;
 
-import vp.freez.exception.ResourceException;
 import vp.freez.resource.Resource;
+import vp.freez.web.exception.ResourceException;
 
 /**
  * 

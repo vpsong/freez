@@ -8,7 +8,8 @@ public class Dao {
 	public int insert(Object obj) throws SQLException {
 		PreparedStatement stmt = StatementManager.getStatement(obj);
 		int ret = stmt.executeUpdate();
-		stmt.close();  
+		stmt.close();
+		ConnectionPool.getPool().retrieve(stmt.getConnection());
 		return ret;
 	}
 	
