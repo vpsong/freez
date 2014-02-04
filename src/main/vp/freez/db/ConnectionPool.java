@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -14,16 +15,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConnectionPool {
 
+	private static Logger logger = Logger.getLogger("ConnectionPool");
 	private BlockingQueue<Connection> connectionQueue = new LinkedBlockingQueue<Connection>();
 	private static ConnectionPool pool = new ConnectionPool(50);
+	private ThreadLocal<Connection> currentConnection = new ThreadLocal<Connection>();
+	private ThreadLocal<Boolean> isRollback = new ThreadLocal<Boolean>();
+
+	private final String DBURL = "jdbc:mysql://localhost:3306/freez";
+	private final String DBUSER = "root";
+	private final String DBPASSWORD = "root";
 
 	private ConnectionPool(int initSize) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
+			logger.info("=====init connection pool=====");
 			for (int i = 0; i < initSize; ++i) {
-				Connection con = DriverManager
-						.getConnection("jdbc:mysql://localhost:3306/freez",
-								"nobody", "nobody");
+				Connection con = DriverManager.getConnection(DBURL, DBUSER,
+						DBPASSWORD);
+				con.setAutoCommit(false);
 				connectionQueue.add(con);
 			}
 		} catch (ClassNotFoundException e) {
@@ -37,16 +46,69 @@ public class ConnectionPool {
 		return pool;
 	}
 
-	@SuppressWarnings("resource")
 	public Connection getConnection() throws SQLException {
-		Connection con = connectionQueue.poll();
-		while (con == null || con.isClosed()) {
+		Connection con = currentConnection.get();
+		if(con == null || con.isClosed()) {
 			con = connectionQueue.poll();
+			currentConnection.set(con);
+		}
+		if (con == null || con.isClosed()) {
+			con = DriverManager.getConnection(DBURL, DBUSER, DBPASSWORD);
+			con.setAutoCommit(false);
 		}
 		return con;
 	}
 
 	public void retrieve(Connection con) {
 		connectionQueue.add(con);
+	}
+	
+	public void commitOrRollback() {
+		Boolean irb = isRollback.get();
+		if(irb == null || irb == false) {
+			commit();
+		} else {
+			rollback();
+		}
+	}
+	
+	public void commit() {
+		Connection con = currentConnection.get();
+		if(con != null) {
+			try {
+				con.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			retrieve(con);
+		}
+	}
+	
+	public void markRollback() {
+		isRollback.set(true);
+	}
+	
+	public void rollback() {
+		Connection con = currentConnection.get();
+		if(con != null) {
+			try {
+				con.rollback();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void destroy() {
+		logger.info("=====destroy connection poll=====");
+		Connection con = null;
+		try {
+			while ((con = connectionQueue.poll()) != null) {
+				con.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		connectionQueue = null;
 	}
 }

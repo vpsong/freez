@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import vp.freez.web.exception.RenderException;
 import vp.freez.web.view.View;
 
 /**
@@ -29,6 +30,7 @@ public abstract class Controller {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		throw new RenderException();
 	}
 	
 	protected void renderView(String name) {
@@ -42,6 +44,7 @@ public abstract class Controller {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		throw new RenderException();
 	}
 
 	protected void renderJSON(String text) {
@@ -54,6 +57,7 @@ public abstract class Controller {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		throw new RenderException();
 	}
 
 	protected boolean isAjaxRequest() {

@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import vp.freez.db.ConnectionPool;
 import vp.freez.web.controller.Controller;
+import vp.freez.web.exception.RenderException;
 import vp.freez.web.interceptor.Interceptor;
 import vp.freez.web.interceptor.InterceptorManager;
 
@@ -42,7 +44,11 @@ public class ActionInvocation {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			if (e.getCause() instanceof RenderException) {
+				ConnectionPool.getPool().commitOrRollback();
+			} else {
+				e.printStackTrace();
+			}
 		}
 	}
 

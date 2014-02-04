@@ -15,7 +15,6 @@ import vp.freez.cache.CacheOversizedException;
 public class DefaultCache<K, V> implements Cache<K, V> {
 
 	private int maxSize;
-	private static final float RELEASE_RATE = 0.8F;
 	private long hitTimes;
 	private long missTimes;
 
@@ -41,11 +40,8 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V put(K key, V value, long age) {
-		if(this.size() >= maxSize * RELEASE_RATE) {
-			deleteExpired();
-			if(this.size() >= maxSize) {
-				throw new CacheOversizedException();
-			}
+		if (this.size() >= maxSize) {
+			throw new CacheOversizedException("cache over max size");
 		}
 		long expires = System.currentTimeMillis() + age * 1000;
 		CacheObject<K, V> obj = new CacheObject<K, V>(key, value, expires);
@@ -55,11 +51,8 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public boolean add(K key, V value, long expires) {
-		if(this.size() >= maxSize * RELEASE_RATE) {
-			deleteExpired();
-			if(this.size() >= maxSize) {
-				throw new CacheOversizedException();
-			}
+		if (this.size() >= maxSize) {
+			throw new CacheOversizedException("cache over max size");
 		}
 		long exist = exist(key);
 		if (exist > 0) {
@@ -70,14 +63,9 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V get(K key) {
+		deleteExpired();
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
-			++missTimes;
-			return null;
-		}
-		if(cobj.expires <= System.currentTimeMillis()) {
-			cacheMap.remove(cobj.key);
-			expiresQueue.remove(cobj);
 			++missTimes;
 			return null;
 		}
@@ -86,13 +74,9 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public long exist(K key) {
+		deleteExpired();
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
-			return -1L;
-		}
-		if(cobj.expires <= System.currentTimeMillis()) {
-			cacheMap.remove(cobj.key);
-			expiresQueue.remove(cobj);
 			return -1L;
 		}
 		return cobj.expires;
@@ -111,7 +95,7 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 		return cobj.object;
 	}
 
-	public int deleteExpired() {
+	public synchronized int deleteExpired() {
 		int count = 0;
 		CacheObject<K, V> cobj = expiresQueue.peek();
 		while (cobj != null && cobj.expires <= System.currentTimeMillis()) {

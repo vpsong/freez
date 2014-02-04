@@ -20,6 +20,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import vp.freez.db.ConnectionPool;
 import vp.freez.util.StringUtil;
 import vp.freez.web.Setup;
 import vp.freez.web.annotation.Ioc;
@@ -61,16 +62,6 @@ public class FreezFilter implements Filter {
 					ctrl.setRequest(request);
 					ctrl.setResponse(response);
 					Map<String, String[]> paramMap = request.getParameterMap();
-					// for (Entry<String, String[]> entry : paramMap.entrySet())
-					// {
-					// Field field = ctrl.getClass().getDeclaredField(
-					// entry.getKey());
-					// if (field != null) {
-					// field.setAccessible(true);
-					// field.set(ctrl, entry.getValue()[0]);
-					// field.setAccessible(false);
-					// }
-					// }
 					Map<String, Object> iocContainer = IocManager.getInstance()
 							.getIocContainer();
 					Field[] fields = ctrl.getClass().getDeclaredFields();
@@ -131,7 +122,7 @@ public class FreezFilter implements Filter {
 	}
 
 	public void destroy() {
-		// TODO Auto-generated method stub
+		ConnectionPool.getPool().destroy();
 	}
 
 }

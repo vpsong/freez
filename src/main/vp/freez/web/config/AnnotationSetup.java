@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import vp.freez.db.ConnectionPool;
 import vp.freez.resource.Resource;
 import vp.freez.resource.impl.FileResource;
 import vp.freez.web.Setup;
@@ -45,6 +46,7 @@ public class AnnotationSetup implements Setup {
 		for(AnnotationInfo ai : aiSet) {
 			ai.affect();
 		}
+		ConnectionPool.getPool();
 	}
 
 	public void destroy(FreezConfig config) {
