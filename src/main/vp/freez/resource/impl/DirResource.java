@@ -9,7 +9,7 @@ import vp.freez.resource.Resource;
 import vp.freez.web.exception.ResourceException;
 
 /**
- * 
+ * 目录资源
  * @author vpsong
  * 
  */
@@ -22,6 +22,9 @@ public class DirResource extends Resource {
 		}
 	}
 
+	/**
+	 * 查找目录下的class文件
+	 */
 	public Set<FileResource> findClassResource() {
 		Set<FileResource> set = new HashSet<FileResource>();
 		File[] files = getFile().listFiles(new ClassFileFilter());

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
- * 
+ * 数据库连接池
  * @author vp.song
  * 
  */
@@ -17,8 +17,17 @@ public class ConnectionPool {
 
 	private static Logger logger = Logger.getLogger("ConnectionPool");
 	private BlockingQueue<Connection> connectionQueue = new LinkedBlockingQueue<Connection>();
+	/**
+	 * 初始化连接数50
+	 */
 	private static ConnectionPool pool = new ConnectionPool(50);
+	/**
+	 * 当前线程的connection
+	 */
 	private ThreadLocal<Connection> currentConnection = new ThreadLocal<Connection>();
+	/**
+	 * 是否需要rollback
+	 */
 	private ThreadLocal<Boolean> isRollback = new ThreadLocal<Boolean>();
 
 	private final String DBURL = "jdbc:mysql://localhost:3306/freez";
@@ -32,6 +41,7 @@ public class ConnectionPool {
 			for (int i = 0; i < initSize; ++i) {
 				Connection con = DriverManager.getConnection(DBURL, DBUSER,
 						DBPASSWORD);
+				// request 级别事务
 				con.setAutoCommit(false);
 				connectionQueue.add(con);
 			}
@@ -59,6 +69,10 @@ public class ConnectionPool {
 		return con;
 	}
 
+	/**
+	 * 回收
+	 * @param con
+	 */
 	public void retrieve(Connection con) {
 		connectionQueue.add(con);
 	}
@@ -84,6 +98,9 @@ public class ConnectionPool {
 		}
 	}
 	
+	/**
+	 * 标记为rollback
+	 */
 	public void markRollback() {
 		isRollback.set(true);
 	}

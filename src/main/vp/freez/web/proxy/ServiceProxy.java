@@ -23,10 +23,11 @@ public class ServiceProxy implements InvocationHandler {
 		if (cacheAnnotation == null) {
 			return method.invoke(targetObject, args);
 		}
+		// action缓存
 		WebCache cache = WebCache.getInstance();
 		String cacheKey = WebCache.methodCacheKey(method, args);
 		Object ret = cache.get(cacheKey);
-		if(ret != null) {
+		if (ret != null) {
 			return ret;
 		}
 		try {

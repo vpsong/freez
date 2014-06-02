@@ -24,7 +24,7 @@ import vp.freez.web.ioc.IocManager;
 import vp.freez.web.proxy.ServiceProxy;
 
 /**
- * 
+ * 文件资源
  * @author vp.song
  * 
  */
@@ -37,9 +37,17 @@ public class FileResource extends Resource {
 		}
 	}
 
+	/**
+	 * 检查该class文件的annotation
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
 	public Set<AnnotationInfo> scan() throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 		Set<AnnotationInfo> set = new HashSet<AnnotationInfo>();
+		// 类级别的注解
 		Class<?> cls = Class.forName(getClassName());
 		Map<Class<?>, String> namespaceMap = UrlMapping.getNamespaceMap();
 		Map<String, Object> iocContainer = IocManager.getInstance()
@@ -62,7 +70,7 @@ public class FileResource extends Resource {
 			interceptorMap.put(interceptor.value(),
 					(Interceptor) cls.newInstance());
 		}
-
+		// 方法级别的注解
 		Method[] methods = cls.getDeclaredMethods();
 		for (Method method : methods) {
 			MethodAnnotationInfo ai = new MethodAnnotationInfo();

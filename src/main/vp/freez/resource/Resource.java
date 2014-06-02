@@ -8,13 +8,19 @@ import vp.freez.resource.impl.DirResource;
 import vp.freez.resource.impl.FileResource;
 
 /**
- * 
+ * 资源
  * @author vpsong
  * 
  */
 public abstract class Resource {
 
+	/**
+	 * 文件
+	 */
 	private File file;
+	/**
+	 * 所在包路径
+	 */
 	private String packagePath;
 
 	public Resource(File file, String packagePath) {
@@ -26,8 +32,10 @@ public abstract class Resource {
 		if (!file.exists()) {
 			return null;
 		} else if (file.isFile()) {
+			// 文件资源
 			return new FileResource(file, packagePath);
 		} else if (file.isDirectory()) {
+			// 目录资源
 			return new DirResource(file, packagePath);
 		}
 		return null;

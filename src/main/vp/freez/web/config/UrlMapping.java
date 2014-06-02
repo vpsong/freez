@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 
+ * url映射
  * @author vpsong
  * 
  */

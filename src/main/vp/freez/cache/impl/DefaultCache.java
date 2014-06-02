@@ -1,42 +1,40 @@
 package vp.freez.cache.impl;
 
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.concurrent.ConcurrentHashMap;
+
 import vp.freez.cache.Cache;
 import vp.freez.cache.CacheOversizedException;
 
 /**
+ * LRU cache
+ * @author vpsong
  * 
- * @author vp.song
- * 
+ * @param <K>
+ * @param <V>
  */
 public class DefaultCache<K, V> implements Cache<K, V> {
 
+	/**
+	 * 最大容量
+	 */
 	private int maxSize;
+	
+	/**
+	 * 命中次数
+	 */
 	private long hitTimes;
+	
+	/**
+	 * 命中失败次数
+	 */
 	private long missTimes;
 
 	private Map<K, CacheObject<K, V>> cacheMap;
-	private PriorityQueue<CacheObject<K, V>> expiresQueue;
 
-	public DefaultCache(int initSize) {
-		this.maxSize = initSize;
-		cacheMap = new ConcurrentHashMap<K, CacheObject<K, V>>(initSize);
-		expiresQueue = new PriorityQueue<CacheObject<K, V>>(initSize,
-				new Comparator<CacheObject<K, V>>() {
-					public int compare(CacheObject<K, V> o1,
-							CacheObject<K, V> o2) {
-						if (o1.expires > o2.expires) {
-							return 1;
-						} else if (o1.expires < o2.expires) {
-							return -1;
-						} else {
-							return 0;
-						}
-					}
-				});
+	public DefaultCache(int initSize, int maxSize) {
+		this.maxSize = maxSize;
+		cacheMap = new LRUCacheMap();
 	}
 
 	public V put(K key, V value, long age) {
@@ -45,8 +43,9 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 		}
 		long expires = System.currentTimeMillis() + age * 1000;
 		CacheObject<K, V> obj = new CacheObject<K, V>(key, value, expires);
-		cacheMap.put(key, obj);
-		expiresQueue.add(obj);
+		synchronized (cacheMap) {
+			cacheMap.put(key, obj);
+		}
 		return value;
 	}
 
@@ -54,27 +53,29 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 		if (this.size() >= maxSize) {
 			throw new CacheOversizedException("cache over max size");
 		}
-		long exist = exist(key);
-		if (exist > 0) {
-			return false;
+		synchronized (cacheMap) {
+			long exist = exist(key);
+			if (exist > 0) {
+				return false;
+			}
+			put(key, value, expires);
 		}
-		put(key, value, expires);
 		return true;
 	}
 
 	public V get(K key) {
-		deleteExpired();
-		CacheObject<K, V> cobj = cacheMap.get(key);
-		if (cobj == null) {
-			++missTimes;
-			return null;
+		synchronized (cacheMap) {
+			CacheObject<K, V> cobj = cacheMap.get(key);
+			if (cobj == null) {
+				++missTimes;
+				return null;
+			}
+			++hitTimes;
+			return cobj.object;
 		}
-		++hitTimes;
-		return cobj.object;
 	}
 
 	public long exist(K key) {
-		deleteExpired();
 		CacheObject<K, V> cobj = cacheMap.get(key);
 		if (cobj == null) {
 			return -1L;
@@ -87,29 +88,19 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	}
 
 	public V remove(K key) {
-		CacheObject<K, V> cobj = cacheMap.remove(key);
-		if (cobj == null) {
-			return null;
+		synchronized (cacheMap) {
+			CacheObject<K, V> cobj = cacheMap.remove(key);
+			if (cobj == null) {
+				return null;
+			}
+			return cobj.object;
 		}
-		expiresQueue.remove(cobj);
-		return cobj.object;
 	}
 
-	public synchronized int deleteExpired() {
-		int count = 0;
-		CacheObject<K, V> cobj = expiresQueue.peek();
-		while (cobj != null && cobj.expires <= System.currentTimeMillis()) {
-			cacheMap.remove(cobj.key);
-			expiresQueue.poll();
-			++count;
-			cobj = expiresQueue.peek();
+	public void clear() {
+		synchronized (cacheMap) {
+			cacheMap.clear();
 		}
-		return count;
-	}
-
-	public synchronized void clear() {
-		cacheMap.clear();
-		expiresQueue.clear();
 	}
 
 	public long getHitTimes() {
@@ -119,17 +110,20 @@ public class DefaultCache<K, V> implements Cache<K, V> {
 	public long getMissTimes() {
 		return missTimes;
 	}
+	
+	public Map<K, CacheObject<K, V>> getMap() {
+		return cacheMap;
+	}
 
-	protected class CacheObject<K, V> {
-		public K key;
-		public V object;
-		public long expires;
+	protected class LRUCacheMap extends LinkedHashMap<K, CacheObject<K, V>> {
+		private static final long serialVersionUID = 1L;
 
-		public CacheObject(K key, V object, long expires) {
-			this.key = key;
-			this.object = object;
-			this.expires = expires;
+		@Override
+		protected boolean removeEldestEntry(
+				java.util.Map.Entry<K, CacheObject<K, V>> eldest) {
+			return System.currentTimeMillis() >= eldest.getValue().expires;
 		}
+
 	}
 
 }

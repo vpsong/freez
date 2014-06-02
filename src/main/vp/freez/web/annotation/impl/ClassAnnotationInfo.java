@@ -5,7 +5,7 @@ import vp.freez.web.annotation.Namespace;
 import vp.freez.web.annotation.Service;
 
 /**
- * 
+ * 类级别注解信息
  * @author vpsong
  * 
  */

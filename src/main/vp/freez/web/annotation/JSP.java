@@ -9,12 +9,13 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author vpsong
- *
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 public @interface JSP {
 	String name() default "";
+
 	String path() default "";
 }

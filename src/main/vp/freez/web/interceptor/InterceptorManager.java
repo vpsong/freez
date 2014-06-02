@@ -12,7 +12,13 @@ import java.util.Map;
  */
 public class InterceptorManager {
 	
+	/**
+	 * action对应的interceptor链
+	 */
 	private Map<Method, List<Interceptor>> invokeMap = new HashMap<Method, List<Interceptor>>();
+	/**
+	 * interceptor名
+	 */
 	private Map<String, Interceptor> interceptorMap = new HashMap<String, Interceptor>();
 	private static InterceptorManager instance = new InterceptorManager();
 

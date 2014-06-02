@@ -8,5 +8,7 @@ import vp.freez.web.context.ActionInvocation;
  *
  */
 public interface Interceptor {
+	
 	void intercept(ActionInvocation invocation);
+	
 }

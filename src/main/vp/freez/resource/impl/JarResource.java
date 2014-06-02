@@ -6,7 +6,7 @@ import java.util.Set;
 import vp.freez.resource.Resource;
 
 /**
- * 
+ * jar包资源
  * @author vpsong
  *
  */

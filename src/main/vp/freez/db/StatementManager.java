@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import vp.freez.db.annotation.Table;
 
 public class StatementManager {
-	
+
 	private static Logger logger = Logger.getLogger("StatementManager");
 
 	public static PreparedStatement getStatement(Object obj)
@@ -45,8 +45,8 @@ public class StatementManager {
 		logger.info(sql.toString());
 		Connection con = ConnectionPool.getPool().getConnection();
 		PreparedStatement stmt = con.prepareStatement(sql.toString());
-		for(int i=0; i<args.size(); ++i) {
-			stmt.setObject(i+1, args.get(i));
+		for (int i = 0; i < args.size(); ++i) {
+			stmt.setObject(i + 1, args.get(i));
 		}
 		return stmt;
 	}

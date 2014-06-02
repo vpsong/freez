@@ -2,6 +2,11 @@ package vp.freez.db;
 
 import java.sql.SQLException;
 
+/**
+ * 领域模型
+ * @author vpsong
+ *
+ */
 public class Model {
 	
 	private Dao dao = Dao.getDao();

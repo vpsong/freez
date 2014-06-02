@@ -3,14 +3,14 @@ package vp.freez.web.cache;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
-import vp.freez.cache.impl.DefaultCache;
+import vp.freez.cache.impl.PriorityCache;
 
 /**
  * 
  * @author vp.song
  * 
  */
-public class WebCache extends DefaultCache<String, Object> {
+public class WebCache extends PriorityCache<String, Object> {
 
 	private static Logger logger = Logger.getLogger("WebCache");
 	private long DEFAULT_AGE = 10L;

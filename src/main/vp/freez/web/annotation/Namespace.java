@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author vpsong
- *
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 public @interface Namespace {
-	
+
 	String value() default "";
 }

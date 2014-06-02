@@ -29,24 +29,34 @@ import vp.freez.web.config.FreezConfig;
 import vp.freez.web.config.UrlMapping;
 import vp.freez.web.context.ActionContext;
 import vp.freez.web.context.ActionInvocation;
+import vp.freez.web.context.FreezRequest;
+import vp.freez.web.context.FreezSession;
 import vp.freez.web.controller.Controller;
 import vp.freez.web.ioc.IocManager;
 
 /**
- * 
+ * 框架入口
  * @author vpsong
  * 
  */
 public class FreezFilter implements Filter {
 
 	private static Logger logger = Logger.getLogger("FreezFilter");
+	/**
+	 * 不拦截静态资源
+	 */
 	private static Pattern ignorePtn = Pattern
 			.compile("^(.+[.])(jsp|png|gif|jpg|js|css|jspx|jpeg)$");
 
 	public void doFilter(ServletRequest req, ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest request = (HttpServletRequest) req;
+		// request wrapper
+		FreezRequest request = new FreezRequest((HttpServletRequest) req);
 		HttpServletResponse response = (HttpServletResponse) resp;
+		// 与play!类似的cookie式session
+		FreezSession session = new FreezSession(request, response);
+		request.setAttribute("freez_session", session);
+
 		boolean isMatch = false;
 		if (ignorePtn.matcher(request.getRequestURI()).find()) {
 			chain.doFilter(request, response);
@@ -83,8 +93,10 @@ public class FreezFilter implements Filter {
 							}
 						}
 					}
-					ActionContext actionContext = new ActionContext(request, response);
-					ActionInvocation invocation = new ActionInvocation(actionContext, ctrl, method); 
+					ActionContext actionContext = new ActionContext(request,
+							response);
+					ActionInvocation invocation = new ActionInvocation(
+							actionContext, ctrl, method);
 					invocation.invoke();
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
@@ -98,12 +110,14 @@ public class FreezFilter implements Filter {
 			}
 		}
 		if (!isMatch) {
+			// 404
 			request.getRequestDispatcher("/404.jsp").forward(request, response);
 		}
 
 	}
 
 	public void init(FilterConfig fConfig) throws ServletException {
+		// 启动类型目前只支持annotation方式
 		String setupType = fConfig.getInitParameter("setup");
 		Setup setup = null;
 		if ("annotation".equals(setupType)) {
@@ -112,6 +126,7 @@ public class FreezFilter implements Filter {
 		if (setup == null) {
 			logger.log(Level.SEVERE, "unsupport setup type");
 		}
+		// 自动扫描该包下的类
 		String controllerPackage = fConfig
 				.getInitParameter("controllerPackage");
 		String classPath = fConfig.getServletContext().getRealPath(
@@ -122,6 +137,7 @@ public class FreezFilter implements Filter {
 	}
 
 	public void destroy() {
+		// 销毁连接池
 		ConnectionPool.getPool().destroy();
 	}
 

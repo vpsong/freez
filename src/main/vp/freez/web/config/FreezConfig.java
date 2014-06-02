@@ -7,7 +7,13 @@ package vp.freez.web.config;
  */
 public class FreezConfig {
 
+	/**
+	 * 初始化类型，annotation或xml
+	 */
 	private String setupType;
+	/**
+	 * 注解所在的包
+	 */
 	private String controllerPackage;
 	private String classPath;
 

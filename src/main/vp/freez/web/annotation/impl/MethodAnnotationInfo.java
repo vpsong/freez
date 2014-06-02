@@ -22,7 +22,7 @@ import vp.freez.web.interceptor.InterceptorManager;
 import vp.freez.web.view.View;
 
 /**
- * 
+ * 方法级别注解信息
  * @author vpsong
  * 
  */

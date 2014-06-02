@@ -18,7 +18,13 @@ import vp.freez.web.interceptor.InterceptorManager;
 public class ActionInvocation {
 
 	private ActionContext actionContext;
+	/**
+	 * 目标controller
+	 */
 	private Controller controller;
+	/**
+	 * 调用的方法
+	 */
 	private Method invokeMethod;
 	private int interceptIndex;
 
@@ -32,7 +38,7 @@ public class ActionInvocation {
 	public void invoke() {
 		List<Interceptor> interceptors = InterceptorManager.getInstance()
 				.getInvokeMap().get(invokeMethod);
-		if (interceptIndex < interceptors.size()) {
+		if (interceptors != null && interceptIndex < interceptors.size()) {
 			Interceptor i = interceptors.get(interceptIndex++);
 			i.intercept(this);
 			return;
@@ -45,6 +51,7 @@ public class ActionInvocation {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof RenderException) {
+				// 用exception方式强制返回
 				ConnectionPool.getPool().commitOrRollback();
 			} else {
 				e.printStackTrace();

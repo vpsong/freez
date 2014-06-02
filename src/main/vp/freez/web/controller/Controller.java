@@ -33,6 +33,10 @@ public abstract class Controller {
 		throw new RenderException();
 	}
 	
+	/**
+	 * 渲染视图
+	 * @param name
+	 */
 	protected void renderView(String name) {
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
 		String key = View.getViewKey(ste.getClassName(), ste.getMethodName(), name);
